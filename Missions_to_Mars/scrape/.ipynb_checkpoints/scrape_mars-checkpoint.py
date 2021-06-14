@@ -1,0 +1,193 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from splinter import Browser\n",
+    "from bs4 import BeautifulSoup\n",
+    "from webdriver_manager.chrome import ChromeDriverManager\n",
+    "import pandas as pd\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "\n",
+      "====== WebDriver manager ======\n",
+      "Current google-chrome version is 91.0.4472\n",
+      "Get LATEST driver version for 91.0.4472\n",
+      "Driver [C:\\Users\\digan\\.wdm\\drivers\\chromedriver\\win32\\91.0.4472.101\\chromedriver.exe] found in cache\n",
+      "\n",
+      "\n",
+      "====== WebDriver manager ======\n",
+      "Current google-chrome version is 91.0.4472\n",
+      "Get LATEST driver version for 91.0.4472\n",
+      "Driver [C:\\Users\\digan\\.wdm\\drivers\\chromedriver\\win32\\91.0.4472.101\\chromedriver.exe] found in cache\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>MarsFacts_name</th>\n",
+       "      <th>MarsFacts_value</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>Equatorial Diameter:</td>\n",
+       "      <td>6,792 km</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>Polar Diameter:</td>\n",
+       "      <td>6,752 km</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>Mass:</td>\n",
+       "      <td>6.39 × 10^23 kg (0.11 Earths)</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>Moons:</td>\n",
+       "      <td>2 ( Phobos &amp; Deimos )</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>Orbit Distance:</td>\n",
+       "      <td>227,943,824 km (1.38 AU)</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "         MarsFacts_name                MarsFacts_value\n",
+       "0  Equatorial Diameter:                       6,792 km\n",
+       "1       Polar Diameter:                       6,752 km\n",
+       "2                 Mass:  6.39 × 10^23 kg (0.11 Earths)\n",
+       "3                Moons:          2 ( Phobos & Deimos )\n",
+       "4       Orbit Distance:       227,943,824 km (1.38 AU)"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "#def scrape():\n",
+    "#def scrape_NASAMarsNews():\n",
+    "    # browser = init_browser() get information from NASA Mars News\n",
+    "    executable_path = {'executable_path': ChromeDriverManager().install()}\n",
+    "    browser = Browser('chrome', **executable_path, headless=False)\n",
+    "\n",
+    "    url = \"https://redplanetscience.com/\"\n",
+    "    browser.visit(url)\n",
+    "\n",
+    "    html = browser.html\n",
+    "    soup = BeautifulSoup(html, \"html.parser\")\n",
+    "\n",
+    "    news_title = soup.find(\"div\", class_=\"content_title\").get_text()\n",
+    "    news_p= soup.find(\"div\", class_=\"article_teaser_body\").get_text()\n",
+    "   \n",
+    "    # Quit the browser\n",
+    "    browser.quit()\n",
+    "    \n",
+    "    # get from image from JPL Mars Space Images - Featured Image\n",
+    "    executable_path = {'executable_path': ChromeDriverManager().install()}\n",
+    "    browser = Browser('chrome', **executable_path, headless=False)\n",
+    "\n",
+    "    # Visit visitcostarica.herokuapp.com\n",
+    "    url = \"https://spaceimages-mars.com/\"\n",
+    "    browser.visit(url)\n",
+    "\n",
+    "\n",
+    "    # Scrape page into Soup\n",
+    "    html = browser.html\n",
+    "    soup = BeautifulSoup(html, \"html.parser\")\n",
+    "\n",
+    "    featured_image_path = soup.find_all('img')[2][\"src\"]\n",
+    "    featured_image_url = url + featured_image_path\n",
+    "\n",
+    "    # Close the browser after scraping\n",
+    "    browser.quit()\n",
+    "    \n",
+    "    #get Mars Facts\n",
+    "    url = 'https://galaxyfacts-mars.com/'\n",
+    "    tables = pd.read_html(url)\n",
+    "    tables\n",
+    "    df = tables[1]\n",
+    "    MarsFacts_df = df.rename(columns={0: \"MarsFacts_name\", 1: \"MarsFacts_value\"}, errors=\"raise\")\n",
+    "    \n",
+    "\n",
+    "    #get Mars Hemispheres images information\n",
+    "    # Store data in a dictionary\n",
+    "    hemisphere_image_urls = [\n",
+    "        {\"title\": \"Cerberus Hemisphere\", \"img_url\": \"https://marshemispheres.com/images/full.jpg\"},\n",
+    "        {\"title\": \"Schiaparelli Hemisphere\", \"img_url\": \"https://marshemispheres.com/images/schiaparelli_enhanced-full.jpg\"},\n",
+    "        {\"title\": \"Syrtis Major Hemisphere\", \"img_url\": \"https://marshemispheres.com/images/syrtis_major_enhanced-full.jpg\"},\n",
+    "        {\"title\": \"Valles Marineris Hemisphere\", \"img_url\": \"https://marshemispheres.com/images/valles_marineris_enhanced-full.jpg\"},\n",
+    "    ]\n",
+    "    "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python [conda env:.conda-PythonData] *",
+   "language": "python",
+   "name": "conda-env-.conda-PythonData-py"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.6.10"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
